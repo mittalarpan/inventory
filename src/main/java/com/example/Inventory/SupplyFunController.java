@@ -22,7 +22,7 @@ public class SupplyFunController {
          return true ;
     }
 
-    @GetMapping("/inventory/supply")            //Just for checking output
+    @GetMapping("/inventory/supply")            //Just for checking
     public List<ViewSupply> getSupply() {
         return supplyFun.getSupply() ;
     }
