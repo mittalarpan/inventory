@@ -43,7 +43,6 @@ public class VendorFunController {
     @CrossOrigin
     @GetMapping("/inventory/vendor/login")
     public List<Product> getAllProducts(@RequestParam(name = "vendorId") String vendorId) {
-        System.out.println(vendorId);
         return productFun.getAllProducts();
     }
 
