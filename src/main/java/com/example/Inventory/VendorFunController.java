@@ -7,6 +7,10 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.swing.*;
+import javax.swing.text.View;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -35,9 +39,9 @@ public class VendorFunController {
 
     @CrossOrigin
     @PostMapping("/inventory/vendor/login")
-    public boolean checkVendor(@RequestBody Vendor vendor) {
-        vendor.setVendorName("");
-        return vendorFun.checkVendor(vendor);
+    public VendorToken checkVendor(@RequestBody Vendor vendor, HttpServletRequest request) { //vendor login check
+        String vendorToken =  vendorFun.checkVendor(vendor,request) ;
+        return new VendorToken(vendorToken) ;
     }
 
     @CrossOrigin
@@ -49,11 +53,31 @@ public class VendorFunController {
 
     @CrossOrigin
     @GetMapping("/inventory/vendor/sellReport")
-    public List<Order> sellReport(@RequestParam (name = "vendorId") String vendorId){
+    public List<ViewReport> sellReport(@RequestParam (name = "vendorId") String vendorId){
         Query query = new Query() ;
         query.addCriteria(Criteria.where("vendorId").is(vendorId)) ;
         List<Order> ls = mongoTemplate.find(query , Order.class) ;
-        return ls ;
+        List<ViewReport> vr = new ArrayList<ViewReport>() ;
+        for(int i=0;i<ls.size();i++){
+            Order order = ls.get(i) ;
+            String vendorIdd = order.getVendorId() ;
+            Query getVendor = new Query() ;
+            getVendor.addCriteria(Criteria.where("vendorId").is(vendorIdd)) ;
+            Vendor vendor = mongoTemplate.findOne(getVendor , Vendor.class) ;
+            Query getProduct = new Query() ;
+            getProduct.addCriteria(Criteria.where("prodId").is(order.getProdId())) ;
+            Product product = mongoTemplate.findOne(getProduct , Product.class) ;
+            System.out.println(product.getProdId() + " vendorId");
+
+            Query getUser = new Query() ;
+            getUser.addCriteria(Criteria.where("user_id").is(order.getUserId())) ;
+            User user = mongoTemplate.findOne(getUser , User.class) ;
+
+            ViewReport viewReport = new ViewReport(product , vendor.getVendorName() , order.getQ() , user.getUser_id(),user.getName()) ;
+
+            vr.add(viewReport) ;
+        }
+        return vr ;
     }
 
 

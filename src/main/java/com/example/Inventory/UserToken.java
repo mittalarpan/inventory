@@ -1,6 +1,9 @@
 package com.example.Inventory;
 
 public class UserToken {
+
+    private String token ;
+
     public String getToken() {
         return token;
     }
@@ -13,6 +16,6 @@ public class UserToken {
         this.token = token;
     }
 
-    private String token ;
+
 
 }
