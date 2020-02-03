@@ -22,7 +22,7 @@ import java.util.logging.SimpleFormatter;
 @Service
 public class SupplyFun {
     public Logger logger = Logger.getLogger("myLogger") ;
-    public FileHandler fileHandler = new FileHandler("/Users/arpanmittal/Desktop/LogFiles/logs.log");
+    public FileHandler fileHandler = new FileHandler("/Users/havyapanchal/Desktop/LogFiles/logs.log");
     @Autowired
     MongoTemplate mongoTemplate;
     @Autowired
