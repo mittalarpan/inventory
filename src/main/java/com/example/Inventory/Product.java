@@ -2,12 +2,13 @@ package com.example.Inventory;
 
 import org.springframework.data.annotation.Id;
 
-public class Product {
+public class Product implements Comparable<Product> {
 
     @Id
     private String prodId;
     private String prodName;
     private int price;
+
 
     public String getProdId() {
         return prodId;
@@ -32,4 +33,12 @@ public class Product {
     public void setPrice(int price) {
         this.price = price;
     }
+
+    @Override
+    public int compareTo(Product product)
+    {
+        int price = product.getPrice() ;
+        return this.price - price ;
+    }
+
 }

@@ -2,6 +2,8 @@ package com.example.Inventory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,4 +21,11 @@ public class ProductFun{
     public List<Product> getAllProducts() {
         return mongoTemplate.findAll(Product.class) ;
     }
+
+    public List<Product> getQueryProducts(String prodName) {
+        Query query = new Query() ;
+        query.addCriteria(Criteria.where("prodName").regex(prodName)) ;
+        return mongoTemplate.find(query,Product.class) ;
+    }
 }
+
