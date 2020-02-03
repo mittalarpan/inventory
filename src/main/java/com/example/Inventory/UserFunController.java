@@ -14,6 +14,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,8 @@ public class UserFunController {
     private SupplyFun supplyFun;
     @Autowired
     private MongoTemplate mongoTemplate ;
+    @Autowired
+    private ProductFun productFun ;
 
     @CrossOrigin
     @PostMapping("/inventory/signUp")
@@ -65,8 +68,14 @@ public class UserFunController {
 
     @CrossOrigin
     @GetMapping("/inventory/user/home")
-    public List<ViewSupply> getAllSupply() {
+    public List<Product> getAllSupply() {
         return supplyFun.getSupply() ;
+    }
+
+    @CrossOrigin
+    @GetMapping("/inventory/user/home/getProduct")
+    public List<ViewSupply> getProduct(@RequestParam(name = "prodId") String prodId){
+        return supplyFun.getProduct(prodId) ;
     }
 
     @CrossOrigin
@@ -89,6 +98,7 @@ public class UserFunController {
         Query query = new Query() ;
         query.addCriteria(Criteria.where("userId").is(user_id)) ;
         List<Order> ls = mongoTemplate.find(query , Order.class) ;
+        Collections.sort(ls) ;
         List<ViewReport> vr = new ArrayList<ViewReport>() ;
         for(int i=0;i<ls.size();i++){
             Order order = ls.get(i) ;
@@ -109,7 +119,7 @@ public class UserFunController {
             System.out.println(user.getUser_id());
             System.out.println(vendor.getVendorId());
             System.out.println(product.getProdId());
-            ViewReport viewReport = new ViewReport(product , vendor.getVendorName() , order.getQ() , user.getUser_id(),user.getName()) ;
+            ViewReport viewReport = new ViewReport(product , vendor.getVendorName() , order.getQ() , user.getUser_id(),user.getName() , order.getTimestamp()) ;
 
             vr.add(viewReport) ;
         }
@@ -123,5 +133,14 @@ public class UserFunController {
         query.addCriteria(Criteria.where("user_id").is(user_id)) ;
         User user = mongoTemplate.findOne(query , User.class) ;
         return user ;
+    }
+
+    @CrossOrigin
+    @GetMapping("/inventory/user/search")
+    public List<Product> getProducts(@RequestParam(name="search_query") String prodName)
+    {
+        List<Product> products = productFun.getQueryProducts(prodName) ;
+        Collections.sort(products) ;
+        return products ;
     }
 }

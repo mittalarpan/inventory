@@ -4,14 +4,15 @@ public class ViewSupply {
     private Product product ;
     private Vendor vendor ;
     int qty ;
-
+    int price ;
     public ViewSupply() {
     }
 
-    public ViewSupply(Product product, Vendor vendor, int qty) {
+    public ViewSupply(Product product, Vendor vendor, int qty , int price) {
         this.product = product;
         this.vendor = vendor;
         this.qty = qty;
+        this.price=price ;
     }
 
     public Product getProduct() {
@@ -36,5 +37,13 @@ public class ViewSupply {
 
     public void setQty(int qty) {
         this.qty = qty;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
     }
 }

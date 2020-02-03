@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.swing.*;
 import javax.swing.text.View;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -57,6 +58,7 @@ public class VendorFunController {
         Query query = new Query() ;
         query.addCriteria(Criteria.where("vendorId").is(vendorId)) ;
         List<Order> ls = mongoTemplate.find(query , Order.class) ;
+        Collections.sort(ls) ;
         List<ViewReport> vr = new ArrayList<ViewReport>() ;
         for(int i=0;i<ls.size();i++){
             Order order = ls.get(i) ;
@@ -73,7 +75,7 @@ public class VendorFunController {
             getUser.addCriteria(Criteria.where("user_id").is(order.getUserId())) ;
             User user = mongoTemplate.findOne(getUser , User.class) ;
 
-            ViewReport viewReport = new ViewReport(product , vendor.getVendorName() , order.getQ() , user.getUser_id(),user.getName()) ;
+            ViewReport viewReport = new ViewReport(product , vendor.getVendorName() , order.getQ() , user.getUser_id(),user.getName() , order.getTimestamp()) ;
 
             vr.add(viewReport) ;
         }

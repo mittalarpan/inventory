@@ -4,10 +4,10 @@ import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 
-public class Supply {
+public class Supply implements Comparable<Supply> {
 
     int qty ;
-
+    int price ;
 
     @Id
     private CompositeKey id;
@@ -38,9 +38,10 @@ public class Supply {
         }
     }
 
-    public Supply(int qty, CompositeKey id) {
+    public Supply(int qty, CompositeKey id , int price) {
         this.qty = qty;
         this.id = id;
+        this.price=price ;
     }
 
     public int getQty() {
@@ -59,6 +60,19 @@ public class Supply {
         this.id = id;
     }
 
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    @Override
+    public int compareTo(Supply supply) {
+        int price = supply.getPrice() ;
+        return this.price-price ;
+    }
     //    @Id
 //    private CompositeKey id;
 //    int qty;

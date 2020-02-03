@@ -1,21 +1,27 @@
 package com.example.Inventory;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Date;
+
 public class ViewReport {
     private Product product ;
     private String vendorName ;
     private int qty ;
     private String userId ;
     private String userName ;
+    private Date timestamp ;
 
     public ViewReport() {
     }
 
-    public ViewReport(Product product, String vendorName, int qty, String userId, String userName) {
+    public ViewReport(Product product, String vendorName, int qty, String userId, String userName , Date timestamp) {
         this.product = product;
         this.vendorName = vendorName;
         this.qty = qty;
         this.userId = userId;
         this.userName = userName;
+        this.timestamp = timestamp ;
     }
 
     public Product getProduct() {
@@ -56,5 +62,13 @@ public class ViewReport {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 }

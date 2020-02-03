@@ -5,22 +5,28 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import java.sql.Timestamp ;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+
 import java.util.ArrayList;
+import java.util.Calendar;
+
+import java.util.Date;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
+//import java
 @Service
 public class SupplyFun {
     public Logger logger = Logger.getLogger("myLogger") ;
     public FileHandler fileHandler = new FileHandler("/Users/arpanmittal/Desktop/LogFiles/logs.log");
     @Autowired
     MongoTemplate mongoTemplate;
-
+    @Autowired
+    ProductFun productfun ;
     public SupplyFun() throws IOException {
     }
 
@@ -30,8 +36,8 @@ public class SupplyFun {
         return mongoTemplate.save(supply);
     }
 
-    public List<ViewSupply> getSupply() {
-        List<ViewSupply> ret = new ArrayList<ViewSupply>();
+    public List<Product> getSupply() {
+        /*List<ViewSupply> ret = new ArrayList<ViewSupply>();
         List<Supply> ls = mongoTemplate.findAll(Supply.class);
 
 
@@ -48,7 +54,8 @@ public class SupplyFun {
             if(product != null && vendor != null)
             ret.add(new ViewSupply(product , vendor , ls.get(i).getQty())) ;
         }
-        return ret ;
+        return ret ;*/
+        return productfun.getAllProducts() ;
     }
 
     public boolean updateSupplyUser(String vendorId, String prodId, int qty, String user_id) {
@@ -67,7 +74,10 @@ public class SupplyFun {
         byte bytes[] = new byte[20];
         random.nextBytes(bytes);
         order_id = bytes.toString();
-        Order order = new Order(order_id, user_id, prodId, vendorId, qty);
+        Calendar calendar = Calendar.getInstance();
+        Date timestamp = (Date) calendar.getTime();
+
+        Order order = new Order(order_id, user_id, prodId, vendorId, qty , timestamp);
         System.out.println("In order" + order.getVendorId()) ;
         mongoTemplate.save(order);
 
@@ -88,7 +98,7 @@ public class SupplyFun {
 
     }
 
-    public void updateSupplyVendor(String vendorId, String prodId, int qty) {
+    public void updateSupplyVendor(String vendorId, String prodId, int qty , int price) {
         logger.addHandler(fileHandler);
         SimpleFormatter simpleFormatter = new SimpleFormatter() ;
         fileHandler.setFormatter(simpleFormatter);
@@ -101,7 +111,7 @@ public class SupplyFun {
         Supply supply = mongoTemplate.findOne(query, Supply.class);
 
         if (supply == null) {
-            Supply supp = new Supply(qty, temp);
+            Supply supp = new Supply(qty, temp , price);
             logger.info("VendorID: " + vendorId + " initiated supply of ProdID: " + prodId);
             mongoTemplate.save(supp);
         } else {
@@ -111,5 +121,25 @@ public class SupplyFun {
             mongoTemplate.save(supply);
         }
 
+    }
+
+    public List<ViewSupply> getProduct(String prodId) {
+        Query query = new Query() ;
+        query.addCriteria(Criteria.where("prodId").is(prodId)) ;
+        List<Supply> supply = mongoTemplate.findAll(Supply.class) ;
+        System.out.println(supply.size() + " is size");
+        List<ViewSupply> ls = new ArrayList<ViewSupply>() ;
+        Product product = mongoTemplate.findById(prodId , Product.class) ;
+        for(int i=0;i<supply.size();i++){
+            String vendorId = supply.get(i).getId().getVendorId()  ;
+            String prodid = supply.get(i).getId().getProdId() ;
+            if(prodId != prodId)
+                continue ;
+            int price = supply.get(i).getPrice() ;
+            Vendor vendor = mongoTemplate.findById(vendorId , Vendor.class) ;
+            int qty = supply.get(i).getQty() ;
+            ls.add(new ViewSupply(product , vendor , qty , price)) ;
+        }
+        return ls ;
     }
 }
