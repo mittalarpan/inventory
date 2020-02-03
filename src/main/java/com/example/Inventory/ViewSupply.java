@@ -16,6 +16,7 @@ public class ViewSupply {
     }
 
     public Product getProduct() {
+        System.out.println("Pankil is here") ;
         return product;
     }
 
