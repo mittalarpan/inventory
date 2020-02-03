@@ -80,6 +80,14 @@ public class VendorFunController {
         return vr ;
     }
 
+    @CrossOrigin
+    @GetMapping("/inventory/vendor/accountDetails")
+    public Vendor getVendorDetails(@RequestParam(name = "vendorId") String vendorId){
+        Query query = new Query() ;
+        query.addCriteria(Criteria.where("vendorId").is(vendorId)) ;
+        Vendor vendor = mongoTemplate.findOne(query , Vendor.class) ;
+        return vendor ;
+    }
 
    /*@CrossOrigin
     @GetMapping("/inventory/try")

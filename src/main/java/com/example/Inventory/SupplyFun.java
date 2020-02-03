@@ -67,12 +67,12 @@ public class SupplyFun {
         byte bytes[] = new byte[20];
         random.nextBytes(bytes);
         order_id = bytes.toString();
-
         Order order = new Order(order_id, user_id, prodId, vendorId, qty);
+        System.out.println("In order" + order.getVendorId()) ;
         mongoTemplate.save(order);
 
         Supply supply = mongoTemplate.findOne(query, Supply.class);
-
+        System.out.println(supply.getQty()) ;
         if (supply.getQty() < qty) {
             System.out.println("False");
             logger.warning("Invalid attempt for purchase by UserID: "+ user_id);
