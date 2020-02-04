@@ -81,6 +81,6 @@ public class Order implements Comparable<Order>{
         if (getTimestamp() == null || order.getTimestamp() == null) {
             return 0;
         }
-        return getTimestamp().compareTo(order.getTimestamp()) ;
+        return (getTimestamp().compareTo(order.getTimestamp())) ;
     }
 }

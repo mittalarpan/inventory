@@ -1,6 +1,6 @@
 package com.example.Inventory;
 
-public class ViewSupply {
+public class ViewSupply implements Comparable<ViewSupply>{
     private Product product ;
     private Vendor vendor ;
     int qty ;
@@ -45,5 +45,12 @@ public class ViewSupply {
 
     public void setPrice(int price) {
         this.price = price;
+    }
+
+
+    @Override
+    public int compareTo(ViewSupply viewSupply) {
+        int price = viewSupply.getPrice() ;
+        return this.price - price ;
     }
 }

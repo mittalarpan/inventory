@@ -68,8 +68,21 @@ public class UserFunController {
 
     @CrossOrigin
     @GetMapping("/inventory/user/home")
-    public List<Product> getAllSupply() {
-        return supplyFun.getSupply() ;
+    public List<Product> getAllOrders(@RequestParam(name = "user_id") String user_id) {
+        Query query = new Query() ;
+        query.addCriteria(Criteria.where("userId").is(user_id)) ;
+        List<Order> orders = mongoTemplate.find(query , Order.class) ;
+        Collections.sort(orders) ;
+        Collections.reverse(orders) ;
+        System.out.println(orders.size());
+        List<Product> recentBuys = new ArrayList<Product>();
+        for(int i=0;i<Math.min(5 , orders.size());i++){
+            //Query query1 = new Query() ;
+            Product product = mongoTemplate.findById(orders.get(i).getProdId() , Product.class);
+            System.out.println(product.getProdId() + " " + product.getProdName());
+            recentBuys.add(product) ;
+        }
+        return recentBuys ;
     }
 
     @CrossOrigin
@@ -81,7 +94,7 @@ public class UserFunController {
     @CrossOrigin
     @PostMapping("inventory/user/supply")
     public boolean updateSupply(@RequestParam(name = "vendorId") String vendorId, @RequestParam(name = "prodId") String prodId, @RequestParam(name = "qty") int qty , @RequestParam(name = "user_id") String user_id) {
-        System.out.println(vendorId + " ,, " + prodId + " ,, " + qty);
+        System.out.println(vendorId + " ,, " + prodId + " ,, " + qty + " ,, " + user_id);
         return supplyFun.updateSupplyUser(vendorId, prodId, qty , user_id);
     }
 
@@ -99,6 +112,7 @@ public class UserFunController {
         query.addCriteria(Criteria.where("userId").is(user_id)) ;
         List<Order> ls = mongoTemplate.find(query , Order.class) ;
         Collections.sort(ls) ;
+        Collections.reverse(ls) ;
         List<ViewReport> vr = new ArrayList<ViewReport>() ;
         for(int i=0;i<ls.size();i++){
             Order order = ls.get(i) ;
