@@ -1,5 +1,6 @@
 package com.example.Inventory;
 
+import com.example.Inventory.models.Vendor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -24,15 +26,15 @@ public class VendorFun {
     }
 
     public Vendor saveVendor(Vendor vendor) {
-        String vendorid = vendor.getVendorId();
+        String vendor_id = vendor.getVendorId();
         Query query = new Query();
-        query.addCriteria(Criteria.where("vendorId").is(vendorid));
+        query.addCriteria(Criteria.where("vendorId").is(vendor_id));
         Vendor chk = mongoTemplate.findOne(query, Vendor.class);
         if (chk == null) {
-            logger.info("VendorID: " + vendorid + " singed up");
+            logger.info("VendorID: " + vendor_id + " singed up");
             return mongoTemplate.save(vendor);
         } else {
-            logger.warning("VendorID: " + vendorid + " tried to create account with email that is already registered");
+            logger.warning("VendorID: " + vendor_id + " tried to create account with email that is already registered");
             return new Vendor("", "", "");
         }
     }
@@ -70,12 +72,4 @@ public class VendorFun {
         }
         return "";
     }
-
-   /* public Vendor vendorDetails(String vendorId)
-    {
-        Query query = new Query() ;
-        query.addCriteria(Criteria.where("vendorId").is(vendorId)) ;
-        Vendor chk = mongoTemplate.findOne(query , Vendor.class) ;
-        return chk ;
-    }*/
 }

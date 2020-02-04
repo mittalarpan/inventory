@@ -1,12 +1,12 @@
 package com.example.Inventory;
 
+import com.example.Inventory.models.Supply;
+import com.example.Inventory.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -78,7 +78,7 @@ public class SupplyFun {
 
         Query query = new Query();
         System.out.println("prodId: " + prodId + "ven: "+ vendorId);
-        Supply.CompositeKey temp = new Supply.CompositeKey(prodId, vendorId);
+        CompositeKey temp = new CompositeKey(prodId, vendorId);
         query.addCriteria(Criteria.where("id").is(temp));
         Supply supply = mongoTemplate.findOne(query, Supply.class);
 
@@ -105,7 +105,7 @@ public class SupplyFun {
         fileHandler.setFormatter(simpleFormatter);
         Query query = new Query();
 
-        Supply.CompositeKey temp = new Supply.CompositeKey(prodId, vendorId);
+        CompositeKey temp = new CompositeKey(prodId, vendorId);
 
         query.addCriteria(Criteria.where("id").is(temp));
 

@@ -22,6 +22,5 @@ public class SupplyFunController {
         supplyFun.updateSupplyVendor(vendorId, prodId, qty, price);
         return true;
     }
-
 }
 

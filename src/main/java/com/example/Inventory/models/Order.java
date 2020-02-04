@@ -3,7 +3,6 @@ package com.example.Inventory;
 import org.springframework.data.annotation.Id;
 
 
-import java.sql.Timestamp;
 import java.util.Date;
 
 public class Order implements Comparable<Order>{
