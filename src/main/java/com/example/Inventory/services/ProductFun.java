@@ -1,4 +1,4 @@
-package com.example.Inventory;
+package com.example.Inventory.services;
 
 import com.example.Inventory.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@Service 
 public class ProductFun{
 
     @Autowired
@@ -24,8 +24,11 @@ public class ProductFun{
     }
 
     public List<Product> getQueryProducts(String prodName) {
+        Criteria regex = Criteria.where("prodName").regex(prodName, "i");
+//        mongoOperations.find(new Query().addCriteria(regex), User.class);
         Query query = new Query() ;
-        query.addCriteria(Criteria.where("prodName").regex(prodName)) ;
+//        query.addCriteria(Criteria.where("prodName").regex(prodName)) ;
+        query.addCriteria(regex) ;
         return mongoTemplate.find(query,Product.class) ;
     }
 }

@@ -1,4 +1,4 @@
-package com.example.Inventory;
+package com.example.Inventory.models;
 
 public class ViewSupply implements Comparable<ViewSupply>{
     private Product product ;

@@ -1,7 +1,7 @@
-package com.example.Inventory;
+package com.example.Inventory.models;
 
-import java.sql.Time;
-import java.sql.Timestamp;
+import com.example.Inventory.models.Product;
+
 import java.util.Date;
 
 public class ViewReport {

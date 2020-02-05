@@ -1,4 +1,4 @@
-package com.example.Inventory;
+package com.example.Inventory.models;
 
 import org.springframework.data.annotation.Id;
 
@@ -35,10 +35,9 @@ public class Product implements Comparable<Product> {
     }
 
     @Override
-    public int compareTo(Product product)
-    {
-        int price = product.getPrice() ;
-        return this.price - price ;
+    public int compareTo(Product product) {
+        int price = product.getPrice();
+        return this.price - price;
     }
 
 }

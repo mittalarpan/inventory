@@ -1,6 +1,7 @@
-package com.example.Inventory;
+package com.example.Inventory.controllers;
 
 import com.example.Inventory.models.Product;
+import com.example.Inventory.services.ProductFun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,15 +14,15 @@ import java.util.List;
 public class ProductFunController {
 
     @Autowired
-    private ProductFun productFun ;
+    private ProductFun productFun;
 
     @PostMapping("/inventory/product")
-    public void saveProduct(@RequestBody Product product){
-        productFun.saveProduct(product) ;
+    public void saveProduct(@RequestBody Product product) {
+        productFun.saveProduct(product);
     }
 
     @GetMapping("/inventory/product")
-    public List<Product> getAllProducts(){
-        return productFun.getAllProducts() ;
+    public List<Product> getAllProducts() {
+        return productFun.getAllProducts();
     }
 }

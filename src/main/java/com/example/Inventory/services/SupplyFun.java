@@ -1,4 +1,4 @@
-package com.example.Inventory;
+package com.example.Inventory.services;
 
 import com.example.Inventory.models.Supply;
 import com.example.Inventory.models.*;
@@ -21,7 +21,7 @@ import java.util.logging.SimpleFormatter;
 @Service
 public class SupplyFun {
     public Logger logger = Logger.getLogger("myLogger");
-    public FileHandler fileHandler = new FileHandler("/Users/havyapanchal/Desktop/LogFiles/logs.log");
+    public FileHandler fileHandler = new FileHandler("/Users/havyapanchal/Desktop/LogFiles/logs_1.log");
     @Autowired
     MongoTemplate mongoTemplate;
     @Autowired
@@ -115,7 +115,7 @@ public class SupplyFun {
 
         if (supply == null) {
 
-            Supply supp = new Supply(qty, temp, Math.min(price , product.getPrice()),timestamp);
+            Supply supp = new Supply(qty, temp, price ,timestamp);
             logger.info("VendorID: " + vendorId + " initiated supply of ProdID: " + prodId);
             mongoTemplate.save(supp);
         } else {
@@ -123,9 +123,11 @@ public class SupplyFun {
             supply.setQty(supply.getQty() + qty);
             logger.info("Vendor: " + vendorId + " increased supply for productID: " + prodId
                     + " by qty: " + qty);
+
             mongoTemplate.save(supply);
         }
-
+        product.setPrice(Math.min(price,product.getPrice())) ;
+        mongoTemplate.save(product,"product") ;
     }
 
     public List<ViewSupply> getProduct(String prodId) {

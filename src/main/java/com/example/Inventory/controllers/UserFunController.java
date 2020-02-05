@@ -1,6 +1,9 @@
-package com.example.Inventory;
+package com.example.Inventory.controllers;
 
 import com.example.Inventory.models.*;
+import com.example.Inventory.services.ProductFun;
+import com.example.Inventory.services.SupplyFun;
+import com.example.Inventory.services.UserFun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;

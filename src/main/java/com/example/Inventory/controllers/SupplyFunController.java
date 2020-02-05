@@ -1,5 +1,6 @@
-package com.example.Inventory;
+package com.example.Inventory.controllers;
 
+import com.example.Inventory.services.SupplyFun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;

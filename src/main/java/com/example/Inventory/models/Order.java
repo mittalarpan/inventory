@@ -1,30 +1,29 @@
-package com.example.Inventory;
+package com.example.Inventory.models;
 
 import org.springframework.data.annotation.Id;
 
-
 import java.util.Date;
 
-public class Order implements Comparable<Order>{
+public class Order implements Comparable<Order> {
 
+    Date timestamp;
     @Id
-    private String orderId ;
-    private String userId ;
-    private String prodId ;
-    private String vendorId ;
-    private int q ;
-    Date timestamp ;
+    private String orderId;
+    private String userId;
+    private String prodId;
+    private String vendorId;
+    private int q;
 
     public Order() {
     }
 
-    public Order(String orderId, String userId, String prodId, String vendorId, int q , Date timestamp) {
+    public Order(String orderId, String userId, String prodId, String vendorId, int q, Date timestamp) {
         this.orderId = orderId;
         this.userId = userId;
         this.prodId = prodId;
         this.vendorId = vendorId;
-        this.q = q ;
-        this.timestamp = timestamp ;
+        this.q = q;
+        this.timestamp = timestamp;
     }
 
     public String getOrderId() {
@@ -80,6 +79,6 @@ public class Order implements Comparable<Order>{
         if (getTimestamp() == null || order.getTimestamp() == null) {
             return 0;
         }
-        return (getTimestamp().compareTo(order.getTimestamp())) ;
+        return (getTimestamp().compareTo(order.getTimestamp()));
     }
 }

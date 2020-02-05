@@ -10,5 +10,5 @@ public class InventoryApplication {
 
 		SpringApplication.run(InventoryApplication.class, args);
 	}
-
 }
+	
