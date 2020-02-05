@@ -88,6 +88,7 @@ public class VendorFunController {
         query.addCriteria(Criteria.where("vendorId").is(vendorId));
         List<Order> ls = mongoTemplate.find(query, Order.class);
         Collections.sort(ls);
+        Collections.reverse(ls); 
         List<ViewReport> vr = new ArrayList<ViewReport>();
         for (int i = 0; i < ls.size(); i++) {
             Order order = ls.get(i);

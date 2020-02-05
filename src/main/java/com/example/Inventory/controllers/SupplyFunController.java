@@ -21,6 +21,7 @@ public class SupplyFunController {
     @PostMapping("/inventory/supply")
     public boolean addSupply(@RequestParam(name = "vendorId") String vendorId, @RequestParam(name = "prodId") String prodId, @RequestParam(name = "qty") int qty, @RequestParam(name = "price") int price) {
         supplyFun.updateSupplyVendor(vendorId, prodId, qty, price);
+        supplyFun.updateTransaction(vendorId,prodId,qty,price) ;
         return true;
     }
 }

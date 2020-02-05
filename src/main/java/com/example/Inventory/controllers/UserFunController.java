@@ -30,6 +30,7 @@ public class UserFunController {
     @CrossOrigin
     @PostMapping("/inventory/signUp")
     public User saveUser(@RequestBody User user) {
+//        return mongoTemplate.save(user,"user") ;
         return userFun.saveUser(user);
     }
 
@@ -78,13 +79,16 @@ public class UserFunController {
     @CrossOrigin
     @GetMapping("/inventory/user/home/getProduct")
     public List<ViewSupply> getProduct(@RequestParam(name = "prodId") String prodId) {
-        return supplyFun.getProduct(prodId);
+        supplyFun.getProduct(prodId);
+        return supplyFun.getProductFromTransaction(prodId);
     }
 
     @CrossOrigin
     @PostMapping("inventory/user/supply")
-    public boolean updateSupply(@RequestParam(name = "vendorId") String vendorId, @RequestParam(name = "prodId") String prodId, @RequestParam(name = "qty") int qty, @RequestParam(name = "user_id") String user_id) {
-        return supplyFun.updateSupplyUser(vendorId, prodId, qty, user_id);
+    public boolean updateSupply(@RequestParam(name = "vendorId") String vendorId, @RequestParam(name = "qty") int qty, @RequestParam(name = "user_id") String user_id, @RequestParam(name = "price") int price, @RequestParam(name="prodId") String prodId) {
+        supplyFun.updateTransactionUser(vendorId, prodId, qty, price);
+        supplyFun.updateSupplyUser(vendorId, prodId, qty, user_id);
+        return true ;
     }
 
     @CrossOrigin

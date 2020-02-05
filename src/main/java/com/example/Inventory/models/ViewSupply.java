@@ -5,6 +5,8 @@ public class ViewSupply implements Comparable<ViewSupply>{
     private Vendor vendor ;
     int qty ;
     int price ;
+
+
     public ViewSupply() {
     }
 
