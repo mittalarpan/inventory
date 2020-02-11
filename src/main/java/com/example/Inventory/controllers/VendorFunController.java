@@ -88,7 +88,7 @@ public class VendorFunController {
         query.addCriteria(Criteria.where("vendorId").is(vendorId));
         List<Order> ls = mongoTemplate.find(query, Order.class);
         Collections.sort(ls);
-        Collections.reverse(ls); 
+        Collections.reverse(ls);
         List<ViewReport> vr = new ArrayList<ViewReport>();
         for (int i = 0; i < ls.size(); i++) {
             Order order = ls.get(i);
@@ -120,6 +120,21 @@ public class VendorFunController {
     @CrossOrigin
     @GetMapping("/inventory/vendor/search")
     public List<Product> getProducts(@RequestParam(name = "search_query") String prodName) {
+      /*  List<Product> products = productFun.getQueryProducts(prodName);
+        List<Product> current_list = new ArrayList<Product>() ;
+        for(int i=0;i<products.size();i++)
+        {
+            Query query = new Query() ;
+            String prod_id = products.get(i).getProdId() ;
+            query.addCriteria(Criteria.where("prodId").is(prod_id));
+            Transaction temp = mongoTemplate.findOne(query,Transaction.class) ;
+            if(temp!=null)
+            {
+                current_list.add(products.ge) ;
+            }
+        }
+        Collections.sort(current_list);
+        return current_list;*/
         List<Product> products = productFun.getQueryProducts(prodName);
         Collections.sort(products);
         return products;

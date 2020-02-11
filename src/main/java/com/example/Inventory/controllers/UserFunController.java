@@ -146,7 +146,19 @@ public class UserFunController {
     @GetMapping("/inventory/user/search")
     public List<Product> getProducts(@RequestParam(name = "search_query") String prodName) {
         List<Product> products = productFun.getQueryProducts(prodName);
-        Collections.sort(products);
-        return products;
+        List<Product> current_list = new ArrayList<Product>() ;
+        for(int i=0;i<products.size();i++)
+        {
+            Query query = new Query() ;
+            String prod_id = products.get(i).getProdId() ;
+            query.addCriteria(Criteria.where("prodId").is(prod_id));
+            Transaction temp = mongoTemplate.findOne(query,Transaction.class) ;
+            if(temp!=null)
+            {
+                current_list.add(products.get(i)) ;
+            }
+        }
+        Collections.sort(current_list);
+        return current_list;
     }
 }

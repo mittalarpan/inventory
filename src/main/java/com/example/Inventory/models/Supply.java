@@ -1,5 +1,6 @@
 package com.example.Inventory.models;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;

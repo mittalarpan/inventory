@@ -31,7 +31,7 @@ public class VendorFun {
         query.addCriteria(Criteria.where("vendorId").is(vendor_id));
         Vendor chk = mongoTemplate.findOne(query, Vendor.class);
         if (chk == null) {
-            logger.info("VendorID: " + vendor_id + " singed up");
+            logger.info("VendorID: " + vendor_id + " signed up");
             return mongoTemplate.save(vendor);
         } else {
             logger.warning("VendorID: " + vendor_id + " tried to create account with email that is already registered");
