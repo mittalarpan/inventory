@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -44,6 +46,7 @@ public class UserFun {
         User chk = mongoTemplate.findOne(query, User.class);
         if (chk == null) {
             logger.info("New User signed up with userID: " + user.getUser_id());
+            user.setPassword(getSecurePassword(user.getPassword()));
             return mongoTemplate.save(user);
         } else {
             logger.info("UserID: " + user.getUser_id() + " tried to create account with prior registered email");
@@ -69,7 +72,7 @@ public class UserFun {
             return false;
         }
 
-        String pass = user.getPassword();
+        String pass = getSecurePassword(user.getPassword());
 
         if (chk.getPassword().equals(pass)) {
             user.setName(chk.getName());
@@ -83,5 +86,21 @@ public class UserFun {
         }
 
         return false;
+    }
+    private static String getSecurePassword(String passwordToHash) {
+        String generatedPassword = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(passwordToHash.getBytes());
+            byte[] bytes = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < bytes.length; i++) {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            generatedPassword = sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return generatedPassword;
     }
 }
