@@ -5,9 +5,9 @@ import org.springframework.data.annotation.Id;
 public class Product implements Comparable<Product> {
 
     @Id
-    private String prodId;
-    private String prodName;
-    private int price;
+    private String prodId = "";
+    private String prodName = "";
+    private int price = 0;
 
 
     public String getProdId() {

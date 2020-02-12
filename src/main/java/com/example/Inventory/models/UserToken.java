@@ -2,7 +2,7 @@ package com.example.Inventory.models;
 
 public class UserToken {
 
-    private String token ;
+    private String token = "";
 
     public String getToken() {
         return token;

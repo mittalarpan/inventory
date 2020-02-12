@@ -8,10 +8,10 @@ public class Order implements Comparable<Order> {
 
     Date timestamp;
     @Id
-    private String orderId;
-    private String userId;
-    private String prodId;
-    private String vendorId;
+    private String orderId = "";
+    private String userId = "";
+    private String prodId = "";
+    private String vendorId = "";
     private int q;
 
     public Order() {

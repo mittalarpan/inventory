@@ -5,13 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -21,6 +19,8 @@ import java.util.logging.SimpleFormatter;
 public class UserFun {
     public Logger logger = Logger.getLogger("myLogger");
     public FileHandler fileHandler = new FileHandler("/Users/havyapanchal/Desktop/LogFiles/logs_1.log");
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @Autowired
     private MongoTemplate mongoTemplate;
     private String token = "";
@@ -40,13 +40,13 @@ public class UserFun {
         logger.addHandler(fileHandler);
         SimpleFormatter simpleFormatter = new SimpleFormatter();
         fileHandler.setFormatter(simpleFormatter);
-        String userid = user.getUser_id();
+        String userId = user.getUser_id();
         Query query = new Query();
-        query.addCriteria(Criteria.where("user_id").is(userid));
-        User chk = mongoTemplate.findOne(query, User.class);
-        if (chk == null) {
+        query.addCriteria(Criteria.where("user_id").is(userId));
+        User userDb = mongoTemplate.findOne(query, User.class);
+        if (userDb == null) {
             logger.info("New User signed up with userID: " + user.getUser_id());
-            user.setPassword(getSecurePassword(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             return mongoTemplate.save(user);
         } else {
             logger.info("UserID: " + user.getUser_id() + " tried to create account with prior registered email");
@@ -58,49 +58,26 @@ public class UserFun {
         return mongoTemplate.findAll(User.class);
     }
 
-    public boolean checkUser(User user, HttpServletRequest request) {
+    public boolean checkUser(String userId,String password) {
         logger.addHandler(fileHandler);
         SimpleFormatter simpleFormatter = new SimpleFormatter();
         fileHandler.setFormatter(simpleFormatter);
-        String userid = user.getUser_id();
-        Query query = new Query();
-        query.addCriteria(Criteria.where("user_id").is(userid));
-        User chk = mongoTemplate.findOne(query, User.class);
+        Query query = new Query() ;
+        query.addCriteria(Criteria.where("user_id").is(userId)) ;
+        User userDb = mongoTemplate.findOne(query,User.class) ;
 
-        if (chk == null) {
-            logger.warning("UserID: " + user.getUser_id() + " tried to login without prior registration");
+        if (userDb == null) {
+            logger.warning("UserID: " + userDb.getUser_id() + " tried to login without prior registration");
             return false;
         }
 
-        String pass = getSecurePassword(user.getPassword());
-
-        if (chk.getPassword().equals(pass)) {
-            user.setName(chk.getName());
-            SecureRandom random = new SecureRandom();
-            byte bytes[] = new byte[20];
-            random.nextBytes(bytes);
-            token = bytes.toString();
-            request.getSession().setAttribute("token", token);
-            logger.info("UserID: " + user.getUser_id() + " logged in successfully.") ;
+        if (passwordEncoder.matches(password, userDb.getPassword())) {
+            logger.info("User ID: " + userId + " logged in successfully.");
             return true;
+        } else {
+            logger.info("User ID: " + userId + " failed to attempt login.") ;
         }
-
         return false;
     }
-    private static String getSecurePassword(String passwordToHash) {
-        String generatedPassword = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(passwordToHash.getBytes());
-            byte[] bytes = md.digest();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < bytes.length; i++) {
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-            }
-            generatedPassword = sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return generatedPassword;
-    }
+
 }

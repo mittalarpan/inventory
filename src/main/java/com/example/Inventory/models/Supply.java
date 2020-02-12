@@ -4,14 +4,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 
 public class Supply implements Comparable<Supply> {
 
-    int qty;
-    int price;
-    Date timestamp;
-
+    int qty = 0;
+    int price = 0;
+    Date timestamp = new Date();
     @Id
     private CompositeKey id;
 

@@ -30,7 +30,8 @@ public class UserFunController {
     @CrossOrigin
     @PostMapping("/inventory/signUp")
     public User saveUser(@RequestBody User user) {
-//        return mongoTemplate.save(user,"user") ;
+        user.setPermissions("ROLE_USER");
+        user.setRoles("USER");
         return userFun.saveUser(user);
     }
 
@@ -41,19 +42,13 @@ public class UserFunController {
 
     @CrossOrigin
     @PostMapping(value = "/inventory/login")
-    public/* ResponseEntity<Boolean> */ UserToken checkUser(@RequestParam(name = "user_id") String user_id, @RequestParam(name = "password") String password, HttpServletRequest request) {
+    public UserToken checkUser(@RequestParam(name = "user_id") String userId, @RequestParam(name = "password") String password) {
 
-        User user = new User();
-        user.setName("");
-        user.setUser_id(user_id);
-        user.setPassword(password);
-        boolean chk = userFun.checkUser(user, request);
+        boolean chk = userFun.checkUser(userId,password);
         if (chk) {
-            String token = (String) request.getSession().getAttribute("token");
-            return new UserToken(token);
+            return new UserToken("success-login");
         } else {
-            String token = "";
-            return new UserToken(token);
+            return new UserToken("failed-login");
         }
     }
 
@@ -85,10 +80,10 @@ public class UserFunController {
 
     @CrossOrigin
     @PostMapping("inventory/user/supply")
-    public boolean updateSupply(@RequestParam(name = "vendorId") String vendorId, @RequestParam(name = "qty") int qty, @RequestParam(name = "user_id") String user_id, @RequestParam(name = "price") int price, @RequestParam(name="prodId") String prodId) {
+    public boolean updateSupply(@RequestParam(name = "vendorId") String vendorId, @RequestParam(name = "qty") int qty, @RequestParam(name = "user_id") String user_id, @RequestParam(name = "price") int price, @RequestParam(name = "prodId") String prodId) {
         supplyFun.updateTransactionUser(vendorId, prodId, qty, price);
         supplyFun.updateSupplyUser(vendorId, prodId, qty, user_id);
-        return true ;
+        return true;
     }
 
     @CrossOrigin
@@ -146,16 +141,14 @@ public class UserFunController {
     @GetMapping("/inventory/user/search")
     public List<Product> getProducts(@RequestParam(name = "search_query") String prodName) {
         List<Product> products = productFun.getQueryProducts(prodName);
-        List<Product> current_list = new ArrayList<Product>() ;
-        for(int i=0;i<products.size();i++)
-        {
-            Query query = new Query() ;
-            String prod_id = products.get(i).getProdId() ;
+        List<Product> current_list = new ArrayList<Product>();
+        for (int i = 0; i < products.size(); i++) {
+            Query query = new Query();
+            String prod_id = products.get(i).getProdId();
             query.addCriteria(Criteria.where("prodId").is(prod_id));
-            Transaction temp = mongoTemplate.findOne(query,Transaction.class) ;
-            if(temp!=null)
-            {
-                current_list.add(products.get(i)) ;
+            Transaction temp = mongoTemplate.findOne(query, Transaction.class);
+            if (temp != null) {
+                current_list.add(products.get(i));
             }
         }
         Collections.sort(current_list);

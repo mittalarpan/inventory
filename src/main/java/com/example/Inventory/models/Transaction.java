@@ -4,15 +4,16 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+
 @Document(collection = "transaction")
 public class Transaction implements Comparable<Transaction> {
     @Id
-    private String transaction_id ;
-    private String prodId ;
-    private String vendorId ;
-    private int qty ;
-    private int price ;
-    private Date timeStamp ;
+    private String transaction_id = "";
+    private String prodId = "";
+    private String vendorId = "";
+    private int qty = 0;
+    private int price = 0;
+    private Date timeStamp = new Date();
 
     public Transaction(String transaction_id, String prodId, String vendorId, int qty, int price, Date timeStamp) {
         this.transaction_id = transaction_id;
@@ -73,7 +74,7 @@ public class Transaction implements Comparable<Transaction> {
 
     @Override
     public int compareTo(Transaction transaction) {
-            int price = transaction.getPrice();
-            return this.price - price;
+        int price = transaction.getPrice();
+        return this.price - price;
     }
 }

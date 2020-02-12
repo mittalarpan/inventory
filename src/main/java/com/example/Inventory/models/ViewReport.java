@@ -12,7 +12,7 @@ public class ViewReport {
     private String userName ;
     private Date timestamp ;
 
-    public ViewReport() {
+    public ViewReport() {        
     }
 
     public ViewReport(Product product, String vendorName, int qty, String userId, String userName , Date timestamp) {
