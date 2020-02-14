@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
+
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserPrincipalDetailsService userPrincipalDetailsService;
@@ -55,14 +56,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return daoAuthenticationProvider;
     }
 
-    /*@Override
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .cors().and().csrf().disable()
-                .authorizeRequests()
+                .authorizeRequests().anyRequest().permitAll();
+    /*.authorizeRequests()
                 .antMatchers("/inventory/signUp","/inventory/vendor/signUp",
                         "/inventory/login","/inventory/vendor/login").permitAll()
-                *//*.antMatchers("/profile/index").authenticated()
+                .antMatchers("/profile/index").authenticated()
                 .antMatchers("/admin/index").hasAuthority("ROLE_ADMIN")
                 .antMatchers("/management/index").hasAnyAuthority("ROLE_ADMIN", "ROLE_MANAGER")
                 .antMatchers("/api/public/test1").hasAuthority("API1")
@@ -75,4 +77,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .httpBasic();
     }*/
+    }
 }

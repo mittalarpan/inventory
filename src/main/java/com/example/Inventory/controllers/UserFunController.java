@@ -44,11 +44,11 @@ public class UserFunController {
     @PostMapping(value = "/inventory/login")
     public UserToken checkUser(@RequestParam(name = "user_id") String userId, @RequestParam(name = "password") String password) {
 
-        boolean chk = userFun.checkUser(userId,password);
+        boolean chk = userFun.checkUser(userId, password);
         if (chk) {
             return new UserToken("success-login");
         } else {
-            return new UserToken("failed-login");
+            return new UserToken("");
         }
     }
 
@@ -60,12 +60,12 @@ public class UserFunController {
         List<Order> orders = mongoTemplate.find(query, Order.class);
         Collections.sort(orders);
         Collections.reverse(orders);
-        System.out.println(orders.size());
-        List<Product> recentBuys = new ArrayList<Product>();
+
+        List<Product> recentBuys = new ArrayList<>();
         for (int i = 0; i < Math.min(5, orders.size()); i++) {
-            //Query query1 = new Query() ;
-            Product product = mongoTemplate.findById(orders.get(i).getProdId(), Product.class);
-            System.out.println(product.getProdId() + " " + product.getProdName());
+
+            String productId = orders.get(i).getProdId();
+            Product product = productFun.findProductById(productId);
             recentBuys.add(product);
         }
         return recentBuys;
@@ -74,15 +74,14 @@ public class UserFunController {
     @CrossOrigin
     @GetMapping("/inventory/user/home/getProduct")
     public List<ViewSupply> getProduct(@RequestParam(name = "prodId") String prodId) {
-        supplyFun.getProduct(prodId);
-        return supplyFun.getProductFromTransaction(prodId);
+        return supplyFun.findProductByTransaction(prodId);
     }
 
     @CrossOrigin
     @PostMapping("inventory/user/supply")
     public boolean updateSupply(@RequestParam(name = "vendorId") String vendorId, @RequestParam(name = "qty") int qty, @RequestParam(name = "user_id") String user_id, @RequestParam(name = "price") int price, @RequestParam(name = "prodId") String prodId) {
-        supplyFun.updateTransactionUser(vendorId, prodId, qty, price);
-        supplyFun.updateSupplyUser(vendorId, prodId, qty, user_id);
+        supplyFun.addUserTransaction(vendorId, prodId, qty, price);
+        supplyFun.reduceSupply(vendorId, prodId, qty, user_id);
         return true;
     }
 
@@ -95,37 +94,9 @@ public class UserFunController {
 
     @CrossOrigin
     @GetMapping("/inventory/user/purchaseReport")
-    public List<ViewReport> purchaseReport(@RequestParam(name = "user_id") String user_id) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("userId").is(user_id));
-        List<Order> ls = mongoTemplate.find(query, Order.class);
-        Collections.sort(ls);
-        Collections.reverse(ls);
-        List<ViewReport> vr = new ArrayList<ViewReport>();
-        for (int i = 0; i < ls.size(); i++) {
-            Order order = ls.get(i);
-            String vendorIdd = order.getVendorId();
-            Query getVendor = new Query();
-            getVendor.addCriteria(Criteria.where("vendorId").is(vendorIdd));
-            Vendor vendor = mongoTemplate.findOne(getVendor, Vendor.class);
-
-            Query getProduct = new Query();
-            String prod_id = order.getProdId();
-            getProduct.addCriteria(Criteria.where("prodId").is(prod_id));
-            Product product = mongoTemplate.findOne(getProduct, Product.class);
-
-            Query getUser = new Query();
-            getUser.addCriteria(Criteria.where("user_id").is(order.getUserId()));
-            User user = mongoTemplate.findOne(getUser, User.class);
-
-            System.out.println(user.getUser_id());
-            System.out.println(vendor.getVendorId());
-            System.out.println(product.getProdId());
-            ViewReport viewReport = new ViewReport(product, vendor.getVendorName(), order.getQ(), user.getUser_id(), user.getName(), order.getTimestamp());
-
-            vr.add(viewReport);
-        }
-        return vr;
+    public List<ViewReport> purchaseReport(@RequestParam(name = "user_id") String user_id, @RequestParam(name = "selected") String sortBy) {
+        System.out.println("selected : " + sortBy);
+        return userFun.getPurchaseReport(user_id, sortBy);
     }
 
     @CrossOrigin
@@ -139,8 +110,9 @@ public class UserFunController {
 
     @CrossOrigin
     @GetMapping("/inventory/user/search")
-    public List<Product> getProducts(@RequestParam(name = "search_query") String prodName) {
-        List<Product> products = productFun.getQueryProducts(prodName);
+    //Giving list of products that are available in the market
+    public List<Product> getProducts(@RequestParam(name = "search_query") String searchQuery) {
+        List<Product> products = productFun.findProductByNameAndDescription(searchQuery);
         List<Product> current_list = new ArrayList<Product>();
         for (int i = 0; i < products.size(); i++) {
             Query query = new Query();

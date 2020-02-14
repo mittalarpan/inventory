@@ -38,7 +38,7 @@ public class VendorFunController {
 
     @CrossOrigin
     @PostMapping("/inventory/vendor/login")
-    public VendorToken checkVendor(@RequestBody Vendor vendor, HttpServletRequest request) { //vendor login check
+    public VendorToken checkVendor(@RequestBody Vendor vendor, HttpServletRequest request) {
         String vendorToken = vendorFun.checkVendor(vendor, request);
         return new VendorToken(vendorToken);
     }
@@ -46,7 +46,7 @@ public class VendorFunController {
     @CrossOrigin
     @GetMapping("/inventory/vendor/login")
     public List<Product> getAllProducts(@RequestParam(name = "vendorId") String vendorId) {
-        System.out.println(vendorId);
+        //System.out.println(vendorId);
         return productFun.getAllProducts();
     }
 
@@ -70,9 +70,7 @@ public class VendorFunController {
             String product_id = vendorSupply.get(i).getId().getProdId();
             int price = vendorSupply.get(i).getPrice();
             int qty = vendorSupply.get(i).getQty();
-            Query query = new Query();
-            query.addCriteria(Criteria.where("prodId").is(product_id));
-            Product product = mongoTemplate.findOne(query, Product.class);
+            Product product = productFun.findProductById(product_id);
             mp.put("product", product);
             mp.put("qty", qty);
             mp.put("price", price);
@@ -83,29 +81,10 @@ public class VendorFunController {
 
     @CrossOrigin
     @GetMapping("/inventory/vendor/sellReport")
-    public List<ViewReport> sellReport(@RequestParam(name = "vendorId") String vendorId) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("vendorId").is(vendorId));
-        List<Order> ls = mongoTemplate.find(query, Order.class);
-        Collections.sort(ls);
-        Collections.reverse(ls);
-        List<ViewReport> vr = new ArrayList<ViewReport>();
-        for (int i = 0; i < ls.size(); i++) {
-            Order order = ls.get(i);
-            String vendorIdd = order.getVendorId();
-            Query getVendor = new Query();
-            getVendor.addCriteria(Criteria.where("vendorId").is(vendorIdd));
-            Vendor vendor = mongoTemplate.findOne(getVendor, Vendor.class);
-            Query getProduct = new Query();
-            getProduct.addCriteria(Criteria.where("prodId").is(order.getProdId()));
-            Product product = mongoTemplate.findOne(getProduct, Product.class);
-            Query getUser = new Query();
-            getUser.addCriteria(Criteria.where("user_id").is(order.getUserId()));
-            User user = mongoTemplate.findOne(getUser, User.class);
-            ViewReport viewReport = new ViewReport(product, vendor.getVendorName(), order.getQ(), user.getUser_id(), user.getName(), order.getTimestamp());
-            vr.add(viewReport);
-        }
-        return vr;
+    public List<ViewReport> sellReport(@RequestParam(name = "vendorId") String vendorId,
+                                       @RequestParam(name = "selected") String sortBy) {
+
+        return vendorFun.getSellReport(vendorId, sortBy);
     }
 
     @CrossOrigin
@@ -119,33 +98,17 @@ public class VendorFunController {
 
     @CrossOrigin
     @GetMapping("/inventory/vendor/search")
-    public List<Product> getProducts(@RequestParam(name = "search_query") String prodName) {
-      /*  List<Product> products = productFun.getQueryProducts(prodName);
-        List<Product> current_list = new ArrayList<Product>() ;
-        for(int i=0;i<products.size();i++)
-        {
-            Query query = new Query() ;
-            String prod_id = products.get(i).getProdId() ;
-            query.addCriteria(Criteria.where("prodId").is(prod_id));
-            Transaction temp = mongoTemplate.findOne(query,Transaction.class) ;
-            if(temp!=null)
-            {
-                current_list.add(products.ge) ;
-            }
-        }
-        Collections.sort(current_list);
-        return current_list;*/
-        List<Product> products = productFun.getQueryProducts(prodName);
+    //List of products that are available to sell
+    public List<Product> getProducts(@RequestParam(name = "search_query") String searchQuery) {
+        List<Product> list = productFun.findProductByNameAndDescription(searchQuery);
+        List<Product> products = new ArrayList<Product>(list) ;
         Collections.sort(products);
         return products;
     }
 
     @CrossOrigin
     @GetMapping("inventory/vendor/getProduct")
-    public Product getProduct(@RequestParam(name = "prodId") String prodId) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("prodId").is(prodId));
-        Product product = mongoTemplate.findOne(query, Product.class);
-        return product;
+    public Product getProduct(@RequestParam(name = "prodId") String productId) {
+        return productFun.findProductById(productId);
     }
 }

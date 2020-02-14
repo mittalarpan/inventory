@@ -1,27 +1,23 @@
 package com.example.Inventory.models;
 
-import com.example.Inventory.models.Product;
+public class ViewReport implements Comparable<ViewReport>{
+    private Product product;
+    private String vendorName;
+    private int qty;
+    private String userId;
+    private String userName;
+    private String timestamp;
 
-import java.util.Date;
-
-public class ViewReport {
-    private Product product ;
-    private String vendorName ;
-    private int qty ;
-    private String userId ;
-    private String userName ;
-    private Date timestamp ;
-
-    public ViewReport() {        
+    public ViewReport() {
     }
 
-    public ViewReport(Product product, String vendorName, int qty, String userId, String userName , Date timestamp) {
+    public ViewReport(Product product, String vendorName, int qty, String userId, String userName, String timestamp) {
         this.product = product;
         this.vendorName = vendorName;
         this.qty = qty;
         this.userId = userId;
         this.userName = userName;
-        this.timestamp = timestamp ;
+        this.timestamp = timestamp;
     }
 
     public Product getProduct() {
@@ -64,11 +60,18 @@ public class ViewReport {
         this.userName = userName;
     }
 
-    public Date getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+
+    @Override
+    public int compareTo(ViewReport viewReport) {
+        int currentPrice = viewReport.getProduct().getPrice() ;
+        return this.getProduct().getPrice() - currentPrice ;
     }
 }

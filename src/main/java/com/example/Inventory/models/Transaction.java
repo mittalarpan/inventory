@@ -4,19 +4,20 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Document(collection = "transaction")
 public class Transaction implements Comparable<Transaction> {
     @Id
-    private String transaction_id = "";
+    private String transaction_id="";
     private String prodId = "";
     private String vendorId = "";
     private int qty = 0;
     private int price = 0;
     private Date timeStamp = new Date();
 
-    public Transaction(String transaction_id, String prodId, String vendorId, int qty, int price, Date timeStamp) {
-        this.transaction_id = transaction_id;
+    public Transaction(String prodId, String vendorId, int qty, int price, Date timeStamp) {
+        this.transaction_id =  UUID.randomUUID().toString() ;
         this.prodId = prodId;
         this.vendorId = vendorId;
         this.qty = qty;

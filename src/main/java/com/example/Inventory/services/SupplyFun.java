@@ -1,29 +1,36 @@
 package com.example.Inventory.services;
 
 import com.example.Inventory.models.*;
+import com.google.gson.Gson;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.ElasticsearchClient;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.mapper.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-//import java
 @Service
 public class SupplyFun {
+
     public Logger logger = Logger.getLogger("myLogger");
     public FileHandler fileHandler = new FileHandler("/Users/havyapanchal/Desktop/LogFiles/logs_1.log");
     @Autowired
-    MongoTemplate mongoTemplate;
+    private MongoTemplate mongoTemplate;
     @Autowired
-    ProductFun productfun;
-
+    private ProductFun productFun;
+    @Autowired
+    private ElasticsearchTemplate elasticsearchTemplate ;
     public SupplyFun() throws IOException {
     }
 
@@ -33,60 +40,30 @@ public class SupplyFun {
         return mongoTemplate.save(supply);
     }
 
-    public List<Product> getSupply() {
-        /*List<ViewSupply> ret = new ArrayList<ViewSupply>();
-        List<Supply> ls = mongoTemplate.findAll(Supply.class);
-
-
-        for(int i=0;i<ls.size();i++){
-            ViewSupply viewSupply = new ViewSupply() ;
-            Query query = new Query() ;
-            query.addCriteria(Criteria.where("prodId").is(ls.get(i).getId().getProdId())) ;
-            Product product = mongoTemplate.findOne(query , Product.class) ;
-            System.out.println(product.getProdId());
-            Query query1 = new Query() ;
-            query1.addCriteria(Criteria.where("vendorId").is(ls.get(i).getId().getVendorId())) ;
-            Vendor vendor = mongoTemplate.findOne(query1 , Vendor.class) ;
-            System.out.println(vendor.getVendorId()+ " x");
-            if(product != null && vendor != null)
-            ret.add(new ViewSupply(product , vendor , ls.get(i).getQty())) ;
-    }
-        return ret ;*/
-        return productfun.getAllProducts();
-    }
-
-    public boolean updateSupplyUser(String vendorId, String prodId, int qty, String user_id) {
+    public boolean reduceSupply(String vendorId, String prodId, int qty, String user_id) {
         logger.addHandler(fileHandler);
         SimpleFormatter simpleFormatter = new SimpleFormatter();
         fileHandler.setFormatter(simpleFormatter);
 
-        String order_id;
 
-        SecureRandom random = new SecureRandom();
-        byte bytes[] = new byte[20];
-        random.nextBytes(bytes);
-        order_id = bytes.toString();
         Calendar calendar = Calendar.getInstance();
-        Date timestamp = (Date) calendar.getTime();
+        Date timestamp = calendar.getTime();
 
-        Order order = new Order(order_id, user_id, prodId, vendorId, qty, timestamp);
-        System.out.println("In order: " + order.getVendorId());
+        Order order = new Order(user_id, prodId, vendorId, qty, timestamp);
         mongoTemplate.save(order);
 
         Query query = new Query();
-        System.out.println("prodId: " + prodId + "ven: "+ vendorId);
-        CompositeKey temp = new CompositeKey(prodId, vendorId);
-        query.addCriteria(Criteria.where("id").is(temp));
+        System.out.println("prodId: " + prodId + " ven: " + vendorId);
+        CompositeKey key = new CompositeKey(prodId, vendorId);
+        query.addCriteria(Criteria.where("id").is(key));
         Supply supply = mongoTemplate.findOne(query, Supply.class);
-
+        System.out.println(supply.getQty() + " and " + qty);
         if (supply.getQty() < qty) {
-            System.out.println("False");
             logger.warning("Invalid attempt for purchase by UserID: " + user_id);
             return false;
         } else {
             supply.setQty(supply.getQty() - qty);
             mongoTemplate.save(supply);
-            System.out.println("True");
             logger.info("UserID: " + user_id + " purchased ProdID: " + prodId
                     + " from VendorID: " + vendorId + " of qty: " + qty);
             return true;
@@ -94,9 +71,9 @@ public class SupplyFun {
 
     }
 
-    public void updateSupplyVendor(String vendorId, String prodId, int qty, int price) {
+    public void addSupply(String vendorId, String prodId, int qty, int price) {
         Calendar calendar = Calendar.getInstance();
-        Date timestamp = (Date) calendar.getTime();
+        Date timestamp = calendar.getTime();
         logger.addHandler(fileHandler);
         SimpleFormatter simpleFormatter = new SimpleFormatter();
         fileHandler.setFormatter(simpleFormatter);
@@ -108,11 +85,11 @@ public class SupplyFun {
 
         Supply supply = mongoTemplate.findOne(query, Supply.class);
 
-        Product product = mongoTemplate.findById(prodId , Product.class) ;
+        Product product = productFun.findProductById(prodId);
 
         if (supply == null) {
 
-            Supply supp = new Supply(qty, temp, price ,timestamp);
+            Supply supp = new Supply(qty, temp, price, timestamp);
             logger.info("VendorID: " + vendorId + " initiated supply of ProdID: " + prodId);
             mongoTemplate.save(supp);
         } else {
@@ -123,23 +100,22 @@ public class SupplyFun {
 
             mongoTemplate.save(supply);
         }
-        product.setPrice(Math.min(price,product.getPrice())) ;
-        mongoTemplate.save(product,"product") ;
+        product.setPrice(Math.min(price, product.getPrice()));
+        mongoTemplate.save(product, "product");
     }
 
-    public List<ViewSupply> getProduct(String prodId) {
+    public List<ViewSupply> getProduct(String productId) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("prodId").is(prodId));
+        query.addCriteria(Criteria.where("prodId").is(productId));
         List<Supply> supply = mongoTemplate.findAll(Supply.class);
         System.out.println(supply.size() + " is size");
         List<ViewSupply> ls = new ArrayList<ViewSupply>();
-        Product product = mongoTemplate.findById(prodId, Product.class);
+        Product product = productFun.findProductById(productId);
         for (int i = 0; i < supply.size(); i++) {
             //System.out.println(i) ;
             String vendorId = supply.get(i).getId().getVendorId();
             String prodid = supply.get(i).getId().getProdId();
-            System.out.println(prodid + " " + prodId + " " + vendorId);
-            if (!(prodId.equals(prodid)))
+            if (!(productId.equals(prodid)))
                 continue;
             int price = supply.get(i).getPrice();
             Vendor vendor = mongoTemplate.findById(vendorId, Vendor.class);
@@ -147,58 +123,68 @@ public class SupplyFun {
             System.out.println(product.getProdId() + " " + vendor.getVendorId() + " " + qty + " " + price);
             ls.add(new ViewSupply(product, vendor, qty, price));
         }
-        Collections.sort(ls) ;
+        Collections.sort(ls);
         return ls;
     }
 
-    public void updateTransaction(String vendorId, String prodId, int qty, int price) {
+    public void addVendorTransaction(String vendorId, String productId, int qty, int price) throws ExecutionException, InterruptedException {
         Calendar calendar = Calendar.getInstance();
-        Date timestamp = (Date) calendar.getTime();
-        SecureRandom random = new SecureRandom();
-        byte bytes[] = new byte[20];
-        random.nextBytes(bytes);
-        String transaction_id = bytes.toString();
-        Transaction transaction = new Transaction(transaction_id,prodId,vendorId,qty,price,timestamp);
-        mongoTemplate.save(transaction,"transaction") ;
-        Product product = mongoTemplate.findById(prodId,Product.class);
-        product.setPrice(Math.min(product.getPrice(),price));
-        mongoTemplate.save(product,"product") ;
+        Date currentTime = calendar.getTime();
+        Transaction transaction = new Transaction(productId, vendorId, qty, price, currentTime);
+        mongoTemplate.save(transaction, "transaction");
+        Product product = productFun.findProductById(productId);
+        product.setPrice(Math.min(product.getPrice(), price));
+
+        Gson gson = new Gson();
+        String json = gson.toJson(product);
+        UpdateRequest request = new UpdateRequest("elasticsearch","product",productId) ;
+        request.doc(json, XContentType.JSON);
+        elasticsearchTemplate.getClient().update(request).get();
+        System.out.println("Finally here");
     }
 
-    public List<ViewSupply> getProductFromTransaction(String prodId) {
-        String previous = "" ;
+    public List<ViewSupply> findProductByTransaction(String productId) {
+        String previous = "";
         List<Transaction> transactions = mongoTemplate.query(Transaction.class).all();
         Collections.sort(transactions);
-        Product product = mongoTemplate.findById(prodId,Product.class);
-        List<ViewSupply> viewSupplies = new ArrayList<ViewSupply>() ;
-        Map<String,Boolean> flag = new HashMap<String, Boolean>() ;
-        for(int i=0;i<transactions.size();i++)
-        {
-            String vendor_id = transactions.get(i).getVendorId() ;
-            String product_id = transactions.get(i).getProdId() ;
-            if(flag.containsKey(vendor_id)==false && prodId.equals(product_id))
-            {
-                Vendor vendor = mongoTemplate.findById(vendor_id,Vendor.class) ;
-                int qty = transactions.get(i).getQty() ;
-                int price = transactions.get(i).getPrice() ;
-               viewSupplies.add(new ViewSupply(product, vendor, qty, price));
-               previous = vendor_id ;
-               flag.put(vendor_id,true);
+        Product product = productFun.findProductById(productId);
+        List<ViewSupply> viewSupplies = new ArrayList<ViewSupply>();
+        Map<String, Boolean> flag = new HashMap<String, Boolean>();
+        for (int i = 0; i < transactions.size(); i++) {
+            String currentVendorId = transactions.get(i).getVendorId();
+            String currentProductId = transactions.get(i).getProdId();
+
+            if (flag.containsKey(currentVendorId) == false && productId.equals(currentProductId)
+                    && transactions.get(i).getQty() > 0) {
+                Vendor vendor = mongoTemplate.findById(currentVendorId, Vendor.class);
+                int qty = transactions.get(i).getQty();
+                int price = transactions.get(i).getPrice();
+                viewSupplies.add(new ViewSupply(product, vendor, qty, price));
+                previous = currentVendorId;
+                flag.put(currentVendorId, true);
             }
         }
-        return viewSupplies ;
+        return viewSupplies;
     }
 
-    public void updateTransactionUser(String vendorId, String prodId, int qty, int price) {
-        Criteria byVendorId = Criteria.where("vendorId").is(vendorId) ;
-        Criteria byProdId = Criteria.where("prodId").is(prodId) ;
-        Criteria byPrice = Criteria.where("price").is(price) ;
-//        Criteria criteria = new Criteria().andOperator(byVendorId, byPrice);
-//        Criteria criteria1 = new Criteria().andOperator(criteria,byProdId) ;
+    public void addUserTransaction(String vendorId, String prodId, int qty, int price) {
+        /*Criteria byVendorId = Criteria.where("vendorId").is(vendorId);
+        Criteria byProdId = Criteria.where("prodId").is(prodId);
+        Criteria byPrice = Criteria.where("price").is(price);
+        Criteria criteria = new Criteria().andOperator(byVendorId, byPrice);
+        Criteria criteria1 = new Criteria().andOperator(criteria,byProdId) ;
         Criteria criteria = new Criteria().andOperator(byPrice,byProdId,byVendorId) ;
         Query query = new Query(criteria);
         Transaction transaction = mongoTemplate.findOne(query,Transaction.class) ;
-        transaction.setQty(transaction.getQty() - qty);
-        mongoTemplate.save(transaction,"transaction") ;
+        transaction.setQty(transaction.getQty() - qty);*/
+        Calendar calendar = Calendar.getInstance();
+        Date date = calendar.getTime();
+        qty=-qty;
+        Transaction transaction = new Transaction(prodId, vendorId, qty, price, date);
+        mongoTemplate.save(transaction, "transaction");
+    }
+
+    public List<Supply> getSupply(){
+        return mongoTemplate.findAll(Supply.class) ;
     }
 }

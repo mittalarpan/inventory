@@ -3,6 +3,7 @@ package com.example.Inventory.models;
 import org.springframework.data.annotation.Id;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class Order implements Comparable<Order> {
 
@@ -17,8 +18,8 @@ public class Order implements Comparable<Order> {
     public Order() {
     }
 
-    public Order(String orderId, String userId, String prodId, String vendorId, int q, Date timestamp) {
-        this.orderId = orderId;
+    public Order(String userId, String prodId, String vendorId, int q, Date timestamp) {
+        this.orderId = UUID.randomUUID().toString() ;;
         this.userId = userId;
         this.prodId = prodId;
         this.vendorId = vendorId;
